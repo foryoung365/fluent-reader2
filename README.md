@@ -1,84 +1,72 @@
 <p align="center">
-  <img width="120" height="120" src="https://github.com/yang991178/fluent-reader/raw/master/build/icon.png">
+  <img width="120" height="120" src="/build/icon.png">
 </p>
-<h3 align="center">Fluent Reader</h3>
-<p align="center">A modern desktop RSS reader</p>
+<h3 align="center">Fluent Reader 2</h3>
+<p align="center">A modern desktop RSS reader with AI power</p>
 <p align="center">
-  <img src="https://img.shields.io/github/v/release/yang991178/fluent-reader?label=version" />
-  <img src="https://img.shields.io/github/downloads/yang991178/fluent-reader/total" />
-  <img src="https://github.com/yang991178/fluent-reader/workflows/CI%2FCD%20Release/badge.svg" />
+  <img src="https://img.shields.io/github/v/release/foryoung365/fluent-reader?label=version" />
+  <img src="https://img.shields.io/github/stars/foryoung365/fluent-reader" />
+  <img src="https://img.shields.io/github/license/foryoung365/fluent-reader" />
 </p>
 <hr />
 
+**Fluent Reader 2** is an actively maintained fork of the original [Fluent Reader](https://github.com/yang991178/fluent-reader). As the original project is no longer maintained, this version focuses on adding modern features like AI integration and keeping dependencies up to date.
+
 ## Download
 
-For Windows 10 users, the recommended way of installation is through [Microsoft Store](https://www.microsoft.com/store/apps/9P71FC94LRH8?cid=github). 
-This enables auto-update and experimental ARM64 support. 
-macOS users can also get Fluent Reader from the [Mac App Store](https://apps.apple.com/app/id1520907427).
+You can get the latest version of Fluent Reader 2 from the [GitHub releases](https://github.com/foryoung365/fluent-reader/releases).
 
-If you are using Linux or an older version of Windows, you can [get Fluent Reader from GitHub releases](https://github.com/yang991178/fluent-reader/releases).
+## New in Version 2.0
 
-### Mobile App
+### 🤖 AI Smart Summary
+Integrate with Large Language Models (LLMs) to understand your feeds faster:
+- **Multiple Providers**: Supports OpenAI, Google Gemini, and custom OpenAI-compatible APIs.
+- **Auto-Generation**: Automatically generate summaries for articles longer than 500 characters.
+- **Markdown Support**: Rich-text rendering for AI summaries including lists, bold text, and code blocks.
+- **Configurable**: Choose your favorite models (e.g., GPT-4o, Gemini 1.5 Pro) and custom API endpoints.
+- **Test Tool**: Built-in connection tester for easy configuration.
 
-The repo of the mobile version of this app [can be found here](https://github.com/yang991178/fluent-reader-lite).
-
-## Features
+## Key Features
 
 <p align="center">
   <img src="https://github.com/yang991178/fluent-reader/raw/master/docs/imgs/screenshot.jpg">
 </p>
 
-- A modern UI inspired by Fluent Design System with full dark mode support.
-- Read locally or sync with self-hosted services compatible with Fever or Google Reader API.
-- Sync with RSS Services including Inoreader, Feedbin, The Old Reader, BazQux Reader, and more.
-- Importing or exporting OPML files, full application data backup & restoration.
-- Read the full content with the built-in article view or load webpages by default.
-- Search for articles with regular expressions or filter by read status.
-- Organize your subscriptions with folder-like groupings.
-- Single-key [keyboard shortcuts](https://github.com/yang991178/fluent-reader/wiki/Support#keyboard-shortcuts).
-- Hide, mark as read, or star articles automatically as they arrive with regular expression rules.
-- Fetch articles in the background and send push notifications.
-
-Support for other RSS services are [under fundraising](https://github.com/yang991178/fluent-reader/issues/23). 
+- **Modern UI**: Inspired by Fluent Design System with full dark mode support.
+- **Service Sync**: Sync with RSS Services including Inoreader, Feedbin, The Old Reader, BazQux Reader, and self-hosted Fever or Google Reader API.
+- **Privacy First**: Data is stored locally or synced with your trusted services. Replaced legacy database for better reliability.
+- **Full Content**: Read with the built-in article view or load webpages by default.
+- **Powerful Rules**: Hide, mark as read, or star articles automatically with regex rules.
+- **OPML Support**: Easy import/export of your subscriptions.
+- **Keyboard Shortcuts**: Efficient navigation with single-key shortcuts.
 
 ## Development
 
-### Contribute
-
-Help make Fluent Reader better by reporting bugs or opening feature requests through [GitHub issues](https://github.com/yang991178/fluent-reader/issues). 
-
-You can also help internationalize the app by providing [translations into additional languages](https://github.com/yang991178/fluent-reader/tree/master/src/scripts/i18n). 
-Refer to the repo of [react-intl-universal](https://github.com/alibaba/react-intl-universal) to get started on internationalization. 
-
-If you enjoy using this app, consider supporting its development by donating through [GitHub Sponsors](https://github.com/sponsors/yang991178), [Paypal](https://www.paypal.me/yang991178), or [Alipay](https://hyliu.me/fluent-reader/imgs/alipay.jpg).
-
 ### Build from source
+
 ```bash
 # Install dependencies
 npm install
 
-# Compile ts & dependencies
+# Compile source code
 npm run build
 
 # Start the application
 npm run electron
 
-# Generate certificate for signature
-electron-builder create-self-signed-cert
 # Package the app for Windows
-npm run package-win
-
+npx electron-builder --win nsis
 ```
 
 ### Developed with
 
-- [Electron](https://github.com/electron/electron)
-- [React](https://github.com/facebook/react)
-- [Redux](https://github.com/reduxjs/redux)
+- [Electron](https://github.com/electron/electron) (v39+)
+- [React](https://github.com/facebook/react) & [Redux](https://github.com/reduxjs/redux)
 - [Fluent UI](https://github.com/microsoft/fluentui)
+- [OpenAI SDK](https://github.com/openai/openai-node)
+- [@seald-io/nedb](https://github.com/seald-io/nedb)
 - [Lovefield](https://github.com/google/lovefield)
-- [Mercury Parser](https://github.com/postlight/mercury-parser)
 
-### License
+## License
 
-BSD
+BSD-3-Clause
