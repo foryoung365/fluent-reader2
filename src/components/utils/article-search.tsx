@@ -10,6 +10,7 @@ type SearchProps = {
     searchOn: boolean
     initQuery: string
     dispatch: AppDispatch
+    style?: React.CSSProperties
 }
 
 type SearchState = {
@@ -48,6 +49,7 @@ class ArticleSearch extends React.Component<SearchProps, SearchState> {
                 <SearchBox
                     componentRef={this.inputRef}
                     className="article-search"
+                    style={this.props.style}
                     placeholder={intl.get("search")}
                     value={this.state.query}
                     onChange={this.onSearchChange}

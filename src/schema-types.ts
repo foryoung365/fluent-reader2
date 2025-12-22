@@ -113,6 +113,7 @@ export type SchemaTypes = {
     serviceConfigs: ServiceConfigs
     filterType: number
     listViewConfigs: ViewConfigs
+    listViewWidth: number
     sortDirection: number
     useNeDB: boolean
 }

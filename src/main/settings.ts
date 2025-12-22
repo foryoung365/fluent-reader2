@@ -207,6 +207,14 @@ ipcMain.handle("set-nedb-status", (_, flag: boolean) => {
     store.set(NEDB_STATUS_STORE_KEY, flag)
 })
 
+const LIST_VIEW_WIDTH_STORE_KEY = "listViewWidth"
+ipcMain.on("get-list-view-width", event => {
+    event.returnValue = store.get(LIST_VIEW_WIDTH_STORE_KEY, 350)
+})
+ipcMain.handle("set-list-view-width", (_, width: number) => {
+    store.set(LIST_VIEW_WIDTH_STORE_KEY, width)
+})
+
 const SORT_DIRECTION_STORE_KEY = "sortDirection"
 ipcMain.on("get-sort-direction", event => {
     event.returnValue = store.get(SORT_DIRECTION_STORE_KEY, 0)

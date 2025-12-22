@@ -146,6 +146,12 @@ const settingsBridge = {
     setAISettings: (settings: AISettings) => {
         ipcRenderer.invoke("set-ai-settings", settings)
     },
+    getListViewWidth: (): number => {
+        return ipcRenderer.sendSync("get-list-view-width")
+    },
+    setListViewWidth: (width: number) => {
+        ipcRenderer.invoke("set-list-view-width", width)
+    },
 }
 
 declare global {

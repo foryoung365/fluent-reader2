@@ -21,6 +21,7 @@
     --transition-timing: cubic-bezier(0.1, 0.9, 0.2, 1);
     --blur: saturate(150%) blur(20px);
 }
+
 @media (prefers-color-scheme: dark) {
     :root {
         --neutralLighterAltOpacity: #282828cc;
@@ -42,6 +43,7 @@
         --whiteConstant: #f8f8f8;
     }
 }
+
 body.darwin {
     --navHeight: 38px;
 }
@@ -54,26 +56,32 @@ body {
     overflow: hidden;
     margin: 0;
 }
+
 body:lang(zh-CN) {
     font-family: "Segoe UI", "Source Han Sans SC Regular", "Microsoft YaHei",
         sans-serif;
 }
+
 body:lang(zh-TW) {
     font-family: "Segoe UI", "Source Han Sans TC Regular", "Microsoft JhengHei",
         sans-serif;
 }
+
 body:lang(ja) {
     font-family: "Segoe UI", "Source Han Sans JP Regular", "Yu Gothic UI",
         sans-serif;
 }
+
 body:lang(ko) {
     font-family: "Segoe UI", "Source Han Sans KR Regular", "Malgun Gothic",
         sans-serif;
 }
+
 body.win32,
 body.linux {
     background-color: var(--neutralLighterAlt);
 }
+
 #root {
     height: 100%;
 }
@@ -81,6 +89,7 @@ body.linux {
 .ms-Link {
     user-select: none;
 }
+
 .ms-ContextualMenu-link,
 .ms-Button,
 .ms-ContextualMenu-item button {
@@ -88,6 +97,7 @@ body.linux {
     font-size: 13px;
     user-select: none;
 }
+
 .ms-Nav-link,
 .ms-Nav-chevronButton {
     font-size: 12px;
@@ -96,59 +106,74 @@ body.linux {
     background-color: transparent;
     color: var(--neutralPrimary);
 }
+
 .ms-Button--primary.danger {
     background: #d13438;
     border-color: #d13438;
 }
+
 .ms-Button--primary.danger:hover {
     background: #ba2d32;
     border-color: #ba2d32;
 }
+
 .ms-Button--primary.danger:active {
     background: #a4262c;
     border-color: #a4262c;
 }
+
 .ms-Button--primary.danger.is-disabled {
     background: var(--neutralLighter);
     border-color: var(--neutralLighter);
 }
+
 .ms-Button--commandBar.active {
     background-color: var(--neutralLight);
     color: var(--neutralDark);
 }
+
 .ms-Button--commandBar.active .ms-Button-icon {
     color: #005a9e;
 }
+
 i.ms-Nav-chevron {
     line-height: 32px;
     height: 32px;
 }
+
 .ms-Nav-groupContent {
     margin-bottom: 24px;
 }
+
 .ms-ActivityItem-activityTypeIcon,
 .ms-ActivityItem-timeStamp {
     user-select: none;
 }
+
 .ms-Label,
 .ms-Spinner-label {
     user-select: none;
 }
+
 .ms-ActivityItem,
 .ms-ActivityItem-commentText {
     color: var(--neutralSecondary);
 }
+
 .ms-ActivityItem-timeStamp {
     color: var(--neutralSecondaryAlt);
 }
+
 .ms-MessageBar {
     user-select: none;
     margin-bottom: 8px;
 }
+
 .ms-MessageBar:not(.ms-MessageBar--warning) {
     background: var(--neutralLighter);
     color: var(--neutralPrimary);
 }
+
 .ms-MessageBar:not(.ms-MessageBar--warning) i[data-icon-name="Info"] {
     color: var(--neutralPrimary);
 }
@@ -157,20 +182,25 @@ i.ms-Nav-chevron {
     border-radius: 5px;
 }
 
-#root > nav {
+#root>nav {
     height: var(--navHeight);
     -webkit-app-region: drag;
     user-select: none;
     overflow: hidden;
+    position: relative;
+    z-index: 10;
 }
-#root > nav .btn,
-#root > nav span {
+
+#root>nav .btn,
+#root>nav span {
     z-index: 1;
     position: relative;
 }
-body.blur #root > nav {
+
+body.blur #root>nav {
     --black: var(--neutralSecondaryAlt);
 }
+
 nav .progress {
     position: fixed;
     top: 0;
@@ -180,13 +210,16 @@ nav .progress {
     height: 2px;
     overflow: hidden;
 }
+
 .ms-ProgressIndicator-itemProgress {
     padding: 0;
 }
+
 .ms-ProgressIndicator-progressTrack {
     background: none;
 }
-#root > nav span.title {
+
+#root>nav span.title {
     font-size: 12px;
     line-height: var(--navHeight);
     vertical-align: top;
@@ -199,14 +232,17 @@ nav .progress {
     overflow: hidden;
     color: var(--black);
 }
-body.darwin #root > nav span.title {
+
+body.darwin #root>nav span.title {
     max-width: 220px;
 }
+
 .btn-group {
     display: inline-block;
     user-select: none;
     -webkit-app-region: none;
 }
+
 .btn-group .seperator {
     display: inline-block;
     width: var(--navHeight);
@@ -215,12 +251,15 @@ body.darwin #root > nav span.title {
     text-align: center;
     vertical-align: middle;
 }
+
 body.darwin .btn-group .seperator {
     display: none;
 }
+
 .btn-group .seperator::before {
     content: "|";
 }
+
 .btn-group .btn {
     display: inline-block;
     width: 48px;
@@ -232,65 +271,82 @@ body.darwin .btn-group .seperator {
     font-size: 14px;
     vertical-align: top;
 }
-#root > nav .btn-group .btn,
+
+#root>nav .btn-group .btn,
 .menu .btn-group .btn {
     height: var(--navHeight);
     line-height: var(--navHeight);
 }
-body.darwin.not-fullscreen #root > nav .btn-group:first-of-type {
+
+body.darwin.not-fullscreen #root>nav .btn-group:first-of-type {
     margin-left: 72px;
 }
-#root > nav .btn-group .btn.system {
+
+#root>nav .btn-group .btn.system {
     position: relative;
     z-index: 10;
 }
+
 nav.hide-btns .btn-group .btn {
     display: none;
 }
+
 nav.hide-btns .btn-group .btn.system {
     display: inline-block;
 }
+
 nav.item-on .btn-group .btn.system {
     color: var(--whiteConstant);
 }
+
 .btn-group .btn:hover,
 .ms-Nav-compositeLink:hover {
     background-color: #0001;
 }
+
 .btn-group .btn:active,
 .ms-Nav-compositeLink:active {
     background-color: #0002;
 }
+
 .ms-Nav-compositeLink:hover .ms-Nav-link {
     background: none;
 }
+
 .btn-group .btn.disabled,
 .btn-group .btn.fetching {
     background-color: unset !important;
     color: var(--neutralSecondaryAlt);
 }
+
 .btn-group .btn.fetching {
     animation: rotating linear 1.5s infinite;
 }
+
 @keyframes rotating {
     0% {
         transform: rotate(0deg);
     }
+
     100% {
         transform: rotate(360deg);
     }
 }
+
 .btn-group .btn.close:hover {
     background-color: #e81123;
     color: var(--whiteConstant) !important;
 }
+
 .btn-group .btn.close:active {
     background-color: #f1707a;
     color: var(--whiteConstant) !important;
 }
+
 .btn-group .btn.inline-block-wide {
     display: none;
 }
+
 body.darwin .btn-group .btn.system {
     display: none;
 }
