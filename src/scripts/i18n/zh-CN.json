@@ -72,7 +72,10 @@
         "LTR": "从左到右",
         "RTL": "从右到左",
         "Vertical": "纵书",
-        "font": "字体"
+        "font": "字体",
+        "aiSummary": "AI 摘要",
+        "generateAISummary": "生成 AI 摘要",
+        "generatingAISummary": "正在生成摘要..."
     },
     "context": {
         "share": "分享",
@@ -238,6 +241,15 @@
         "articleSorting": "文章排序方向",
         "newestFirst": "从新到旧",
         "oldestFirst": "从旧到新",
-        "never": "从不"
+        "never": "从不",
+        "enableAISummary": "启用 AI 摘要",
+        "aiProvider": "AI 供应商",
+        "aiApiKey": "API Key",
+        "aiApiUrl": "API 基础 URL (可选)",
+        "aiModel": "模型",
+        "testConnection": "测试连接",
+        "testSuccess": "连接成功！",
+        "testFailure": "连接失败：{message}",
+        "aiHint": "摘要在文章视图中按需生成。调用 AI 可能会产生账户费用。"
     }
 }

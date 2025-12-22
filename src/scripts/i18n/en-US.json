@@ -72,7 +72,10 @@
         "LTR": "Left-to-right",
         "RTL": "Right-to-left",
         "Vertical": "Vertical",
-        "font": "Font"
+        "font": "Font",
+        "aiSummary": "AI Summary",
+        "generateAISummary": "Generate AI Summary",
+        "generatingAISummary": "Generating summary..."
     },
     "context": {
         "share": "Share",
@@ -240,6 +243,15 @@
         "articleSorting": "Article sorting direction",
         "newestFirst": "Newest to oldest",
         "oldestFirst": "Oldest to newest",
-        "never": "Never"
+        "never": "Never",
+        "enableAISummary": "Enable AI summary",
+        "aiProvider": "AI Provider",
+        "aiApiKey": "API Key",
+        "aiApiUrl": "API Base URL (Optional)",
+        "aiModel": "Model",
+        "testConnection": "Test Connection",
+        "testSuccess": "Connection successful!",
+        "testFailure": "Connection failed: {message}",
+        "aiHint": "Summaries are generated via the article view. Costs may apply to your AI account."
     }
 }

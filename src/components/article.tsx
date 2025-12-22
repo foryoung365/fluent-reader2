@@ -50,6 +50,9 @@ type ArticleState = {
     loaded: boolean
     error: boolean
     errorDescription: string
+    aiSummary: string
+    aiLoading: boolean
+    aiSummaryEnabled: boolean
 }
 
 class Article extends React.Component<ArticleProps, ArticleState> {
@@ -66,6 +69,9 @@ class Article extends React.Component<ArticleProps, ArticleState> {
             loaded: false,
             error: false,
             errorDescription: "",
+            aiSummary: "",
+            aiLoading: false,
+            aiSummaryEnabled: window.settings.getAISettings().enabled,
         }
         window.utils.addWebviewContextListener(this.contextMenuHandler)
         window.utils.addWebviewKeydownListener(this.keyDownHandler)
@@ -253,6 +259,58 @@ class Article extends React.Component<ArticleProps, ArticleState> {
 
     webviewLoaded = () => {
         this.setState({ loaded: true })
+        if (this.state.aiSummaryEnabled && !this.state.loadWebpage) {
+            this.injectAIUI()
+        }
+    }
+
+    injectAIUI = () => {
+        const hasSummary = this.state.aiSummary.length > 0
+        const buttonText = intl.get("article.generateAISummary")
+        const loadingText = intl.get("article.generatingAISummary")
+        const summaryTitle = intl.get("article.aiSummary")
+
+        const script = `
+            (function() {
+                var container = document.getElementById("ai-summary-container");
+                if (!container) return;
+                
+                if (${hasSummary}) {
+                    var summaryText = ${JSON.stringify(this.state.aiSummary)};
+                    container.innerHTML = '<div class="ai-summary-card"><p class="ai-summary-title">${summaryTitle}</p><div class="ai-summary-content">' + summaryText + '</div></div>';
+                } else if (${this.state.aiLoading}) {
+                    container.innerHTML = '<div class="ai-summary-loading"><span class="spinner"></span> ${loadingText}</div>';
+                } else {
+                    container.innerHTML = '<button id="generate-ai-btn" class="ai-btn">${buttonText}</button>';
+                    document.getElementById("generate-ai-btn").onclick = function() {
+                        console.log("EXECUTE_AI_SUMMARY");
+                    };
+                }
+            })();
+        `
+        this.webview.executeJavaScript(script)
+    }
+
+    generateSummary = async () => {
+        if (this.state.aiLoading) return
+        this.setState({ aiLoading: true }, () => {
+            this.injectAIUI()
+        })
+
+        const settings = window.settings.getAISettings()
+        const title = this.props.item.title
+        const content = this.state.loadFull ? this.state.fullContent : this.props.item.content
+
+        // Strip HTML for the prompt
+        const tmp = document.createElement("div")
+        tmp.innerHTML = content
+        const plainText = tmp.textContent || tmp.innerText || ""
+
+        const summary = await window.utils.generateSummary(settings, title, plainText)
+
+        this.setState({ aiSummary: summary, aiLoading: false }, () => {
+            this.injectAIUI()
+        })
     }
     webviewError = (reason: string) => {
         this.setState({ error: true, errorDescription: reason })
@@ -274,6 +332,11 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                 webview.focus()
                 this.setState({ loaded: false, error: false })
                 webview.addEventListener("did-stop-loading", this.webviewLoaded)
+                webview.addEventListener("console-message", (e) => {
+                    if (e.message === "EXECUTE_AI_SUMMARY") {
+                        this.generateSummary()
+                    }
+                })
                 let card = document.querySelector(
                     `#refocus div[data-iid="${this.props.item._id}"]`
                 ) as HTMLElement
@@ -290,6 +353,8 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                 loadFull:
                     this.props.source.openTarget ===
                     SourceOpenTarget.FullContent,
+                aiSummary: "",
+                aiLoading: false,
             })
             if (this.props.source.openTarget === SourceOpenTarget.FullContent)
                 this.loadFull()
@@ -363,15 +428,25 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                             { hour12: !this.props.locale.startsWith("zh") }
                         )}
                     </p>
+                    <style dangerouslySetInnerHTML={{
+                        __html: `
+                        .ai-btn { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; margin: 12px 0; display: block; }
+                        .ai-btn:hover { background: var(--primary-alt); }
+                        .ai-summary-card { background: #f3f2f1; padding: 12px; border-radius: 4px; border-left: 4px solid var(--primary); margin: 12px 0; font-size: 14px; line-height: 1.5; }
+                        .ai-summary-content { white-space: pre-wrap; word-break: break-word; }
+                        @media (prefers-color-scheme: dark) { .ai-summary-card { background: #323130; } }
+                        .ai-summary-title { font-weight: 600; margin-top: 0; margin-bottom: 8px; font-size: 12px; color: var(--gray); text-transform: uppercase; }
+                        .ai-summary-loading { color: var(--gray); font-size: 13px; margin: 12px 0; }
+                    ` }} />
+                    <div id="ai-summary-container"></div>
                     <article></article>
                 </>
             )
         )
         return `article/article.html?a=${a}&h=${h}&f=${encodeURIComponent(
             this.state.fontFamily
-        )}&s=${this.state.fontSize}&d=${this.props.source.textDir}&u=${
-            this.props.item.link
-        }&m=${this.state.loadFull ? 1 : 0}`
+        )}&s=${this.state.fontSize}&d=${this.props.source.textDir}&u=${this.props.item.link
+            }&m=${this.state.loadFull ? 1 : 0}`
     }
 
     render = () => (
@@ -413,12 +488,12 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                             this.props.item.hasRead
                                 ? { iconName: "StatusCircleRing" }
                                 : {
-                                      iconName: "RadioBtnOn",
-                                      style: {
-                                          fontSize: 14,
-                                          textAlign: "center",
-                                      },
-                                  }
+                                    iconName: "RadioBtnOn",
+                                    style: {
+                                        fontSize: 14,
+                                        textAlign: "center",
+                                    },
+                                }
                         }
                         onClick={() =>
                             this.props.toggleHasRead(this.props.item)

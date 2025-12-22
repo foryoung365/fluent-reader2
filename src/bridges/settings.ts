@@ -5,6 +5,8 @@ import {
     SearchEngines,
     ServiceConfigs,
     ViewConfigs,
+    AISettings,
+    AIProvider,
 } from "../schema-types"
 import { ipcRenderer } from "electron"
 
@@ -137,6 +139,12 @@ const settingsBridge = {
     },
     setSortDirection: (direction: number) => {
         ipcRenderer.invoke("set-sort-direction", direction)
+    },
+    getAISettings: (): AISettings => {
+        return ipcRenderer.sendSync("get-ai-settings")
+    },
+    setAISettings: (settings: AISettings) => {
+        ipcRenderer.invoke("set-ai-settings", settings)
     },
 }
 

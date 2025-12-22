@@ -8,6 +8,8 @@ import {
     SyncService,
     ServiceConfigs,
     ViewConfigs,
+    AISettings,
+    AIProvider,
 } from "../schema-types"
 import { ipcMain, session, nativeTheme, app } from "electron"
 import { WindowManager } from "./window"
@@ -211,4 +213,18 @@ ipcMain.on("get-sort-direction", event => {
 })
 ipcMain.handle("set-sort-direction", (_, direction: number) => {
     store.set(SORT_DIRECTION_STORE_KEY, direction)
+})
+
+const AI_SETTINGS_STORE_KEY = "aiSettings"
+ipcMain.on("get-ai-settings", event => {
+    event.returnValue = store.get(AI_SETTINGS_STORE_KEY, {
+        enabled: false,
+        provider: AIProvider.OpenAI,
+        apiKey: "",
+        apiUrl: "",
+        model: "gpt-3.5-turbo",
+    })
+})
+ipcMain.handle("set-ai-settings", (_, settings: AISettings) => {
+    store.set(AI_SETTINGS_STORE_KEY, settings)
 })

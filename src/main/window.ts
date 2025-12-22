@@ -3,6 +3,7 @@ import { BrowserWindow, nativeTheme, app } from "electron"
 import path = require("path")
 import { setThemeListener } from "./settings"
 import { setUtilsListeners } from "./utils"
+import { setAIListeners } from "./ai"
 
 export class WindowManager {
     mainWindow: BrowserWindow = null
@@ -26,6 +27,7 @@ export class WindowManager {
     private setListeners = () => {
         setThemeListener(this)
         setUtilsListeners(this)
+        setAIListeners()
 
         app.on("second-instance", () => {
             if (this.mainWindow !== null) {
@@ -48,8 +50,8 @@ export class WindowManager {
                     process.platform === "darwin"
                         ? "#00000000"
                         : nativeTheme.shouldUseDarkColors
-                        ? "#282828"
-                        : "#faf9f8",
+                            ? "#282828"
+                            : "#faf9f8",
                 vibrancy: "sidebar",
                 x: this.mainWindowState.x,
                 y: this.mainWindowState.y,

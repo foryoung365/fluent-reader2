@@ -81,8 +81,23 @@ export interface TouchBarTexts {
     notifications: string
 }
 
+export const enum AIProvider {
+    OpenAI,
+    Gemini,
+    Custom,
+}
+
+export interface AISettings {
+    enabled: boolean
+    provider: AIProvider
+    apiKey: string
+    apiUrl: string
+    model: string
+}
+
 export type SchemaTypes = {
     version: string
+    aiSettings: AISettings
     theme: ThemeSettings
     pac: string
     pacOn: boolean

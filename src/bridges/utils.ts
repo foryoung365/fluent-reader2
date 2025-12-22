@@ -3,6 +3,7 @@ import {
     ImageCallbackTypes,
     TouchBarTexts,
     WindowStateListenerType,
+    AISettings,
 } from "../schema-types"
 import { IObjectWithKey } from "@fluentui/react"
 
@@ -173,6 +174,12 @@ const utilsBridge = {
 
     initFontList: (): Promise<Array<string>> => {
         return ipcRenderer.invoke("init-font-list")
+    },
+    generateSummary: (settings: AISettings, title: string, content: string): Promise<string> => {
+        return ipcRenderer.invoke("generate-ai-summary", settings, title, content)
+    },
+    testAISettings: (settings: AISettings): Promise<{ success: boolean; message?: string }> => {
+        return ipcRenderer.invoke("test-ai-settings", settings)
     },
 }
 

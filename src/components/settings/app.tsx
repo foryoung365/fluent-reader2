@@ -6,7 +6,7 @@ import {
     calculateItemSize,
     getSearchEngineName,
 } from "../../scripts/utils"
-import { ThemeSettings, SearchEngines } from "../../schema-types"
+import { ThemeSettings, SearchEngines, AIProvider, AISettings } from "../../schema-types"
 import {
     getThemeSettings,
     setThemeSettings,
@@ -42,6 +42,8 @@ type AppTabState = {
     cacheSize: string
     deleteIndex: string
     sortDirection: number
+    aiSettings: AISettings
+    testResult: string
 }
 
 class AppTab extends React.Component<AppTabProps, AppTabState> {
@@ -55,6 +57,8 @@ class AppTab extends React.Component<AppTabProps, AppTabState> {
             cacheSize: null,
             deleteIndex: null,
             sortDirection: window.settings.getSortDirection(),
+            aiSettings: window.settings.getAISettings(),
+            testResult: "",
         }
         this.getItemSize()
         this.getCacheSize()
@@ -185,6 +189,28 @@ class AppTab extends React.Component<AppTabProps, AppTabState> {
         this.setState({ themeSettings: option.key as ThemeSettings })
     }
 
+    aiProviderOptions = (): IDropdownOption[] => [
+        { key: AIProvider.OpenAI, text: "OpenAI / Compatible" },
+        { key: AIProvider.Gemini, text: "Gemini" },
+        { key: AIProvider.Custom, text: "Custom" },
+    ]
+
+    onAISettingsChange = (newSettings: Partial<AISettings>) => {
+        const aiSettings = { ...this.state.aiSettings, ...newSettings }
+        window.settings.setAISettings(aiSettings)
+        this.setState({ aiSettings, testResult: "" })
+    }
+
+    onTestAIConnection = async () => {
+        this.setState({ testResult: "..." })
+        const res = await window.utils.testAISettings(this.state.aiSettings)
+        if (res.success) {
+            this.setState({ testResult: intl.get("app.testSuccess") })
+        } else {
+            this.setState({ testResult: intl.get("app.testFailure", { message: res.message }) })
+        }
+    }
+
     render = () => (
         <div className="tab-body">
             <Label>{intl.get("app.language")}</Label>
@@ -284,6 +310,63 @@ class AppTab extends React.Component<AppTabProps, AppTabState> {
                         {intl.get("app.pacHint")}
                     </span>
                 </form>
+            )}
+
+            <Stack horizontal verticalAlign="baseline">
+                <Stack.Item grow>
+                    <Label>{intl.get("app.enableAISummary")}</Label>
+                </Stack.Item>
+                <Stack.Item>
+                    <Toggle
+                        checked={this.state.aiSettings.enabled}
+                        onChange={(_, checked) => this.onAISettingsChange({ enabled: checked })}
+                    />
+                </Stack.Item>
+            </Stack>
+
+            {this.state.aiSettings.enabled && (
+                <Stack tokens={{ childrenGap: 8 }} style={{ marginBottom: 16 }}>
+                    <Label>{intl.get("app.aiProvider")}</Label>
+                    <Dropdown
+                        selectedKey={this.state.aiSettings.provider}
+                        options={this.aiProviderOptions()}
+                        onChanged={opt => this.onAISettingsChange({ provider: opt.key as AIProvider })}
+                        style={{ width: 200 }}
+                    />
+                    <TextField
+                        label={intl.get("app.aiApiKey")}
+                        type="password"
+                        value={this.state.aiSettings.apiKey}
+                        onChange={(_, val) => this.onAISettingsChange({ apiKey: val })}
+                    />
+                    <TextField
+                        label={intl.get("app.aiApiUrl")}
+                        placeholder="https://api.openai.com/v1"
+                        value={this.state.aiSettings.apiUrl}
+                        onChange={(_, val) => this.onAISettingsChange({ apiUrl: val })}
+                    />
+                    <TextField
+                        label={intl.get("app.aiModel")}
+                        placeholder="gpt-3.5-turbo"
+                        value={this.state.aiSettings.model}
+                        onChange={(_, val) => this.onAISettingsChange({ model: val })}
+                    />
+                    <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 12 }}>
+                        <DefaultButton
+                            text={intl.get("app.testConnection")}
+                            onClick={this.onTestAIConnection}
+                            disabled={this.state.testResult === "..."}
+                        />
+                        {this.state.testResult && (
+                            <span className="settings-hint" style={{ margin: 0 }}>
+                                {this.state.testResult}
+                            </span>
+                        )}
+                    </Stack>
+                    <span className="settings-hint">
+                        {intl.get("app.aiHint")}
+                    </span>
+                </Stack>
             )}
 
             <Label>{intl.get("app.cleanup")}</Label>
