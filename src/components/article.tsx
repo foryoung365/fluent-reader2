@@ -1,4 +1,5 @@
 import * as React from "react"
+import { marked } from "marked"
 import intl from "react-intl-universal"
 import { renderToString } from "react-dom/server"
 import { RSSItem } from "../scripts/models/item"
@@ -270,14 +271,23 @@ class Article extends React.Component<ArticleProps, ArticleState> {
         const loadingText = intl.get("article.generatingAISummary")
         const summaryTitle = intl.get("article.aiSummary")
 
+        let summaryHtml = ""
+        if (hasSummary) {
+            try {
+                summaryHtml = marked.parse(this.state.aiSummary) as string
+            } catch (e) {
+                summaryHtml = this.state.aiSummary
+            }
+        }
+
         const script = `
             (function() {
                 var container = document.getElementById("ai-summary-container");
                 if (!container) return;
                 
                 if (${hasSummary}) {
-                    var summaryText = ${JSON.stringify(this.state.aiSummary)};
-                    container.innerHTML = '<div class="ai-summary-card"><p class="ai-summary-title">${summaryTitle}</p><div class="ai-summary-content">' + summaryText + '</div></div>';
+                    var html = ${JSON.stringify(summaryHtml)};
+                    container.innerHTML = '<div class="ai-summary-card"><p class="ai-summary-title">${summaryTitle}</p><div class="ai-summary-content">' + html + '</div></div>';
                 } else if (${this.state.aiLoading}) {
                     container.innerHTML = '<div class="ai-summary-loading"><span class="spinner"></span> ${loadingText}</div>';
                 } else {
@@ -433,8 +443,15 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                         .ai-btn { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; margin: 12px 0; display: block; }
                         .ai-btn:hover { background: var(--primary-alt); }
                         .ai-summary-card { background: #f3f2f1; padding: 12px; border-radius: 4px; border-left: 4px solid var(--primary); margin: 12px 0; font-size: 14px; line-height: 1.5; }
-                        .ai-summary-content { white-space: pre-wrap; word-break: break-word; }
-                        @media (prefers-color-scheme: dark) { .ai-summary-card { background: #323130; } }
+                        .ai-summary-content { word-break: break-word; }
+                        .ai-summary-content p { margin-top: 0; }
+                        .ai-summary-content p:last-child { margin-bottom: 0; }
+                        .ai-summary-content ul, .ai-summary-content ol { padding-inline-start: 20px; }
+                        .ai-summary-content code { background: rgba(0,0,0,0.05); padding: 2px 4px; border-radius: 3px; }
+                        @media (prefers-color-scheme: dark) { 
+                            .ai-summary-card { background: #323130; } 
+                            .ai-summary-content code { background: rgba(255,255,255,0.1); }
+                        }
                         .ai-summary-title { font-weight: 600; margin-top: 0; margin-bottom: 8px; font-size: 12px; color: var(--gray); text-transform: uppercase; }
                         .ai-summary-loading { color: var(--gray); font-size: 13px; margin: 12px 0; }
                     ` }} />
