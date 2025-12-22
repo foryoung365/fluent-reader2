@@ -250,7 +250,15 @@ function fetchItems(
         const [items, configs] = await dispatch(hook())
         if (items.length > 0) {
             const inserted = await insertItems(items)
-            dispatch(fetchItemsSuccess(inserted.reverse(), getState().items))
+            const sortDirection = window.settings.getSortDirection()
+            dispatch(
+                fetchItemsSuccess(
+                    sortDirection === 0
+                        ? [...inserted].reverse()
+                        : inserted,
+                    getState().items
+                )
+            )
             if (background) {
                 for (let item of inserted) {
                     if (item.notify) dispatch(pushNotification(item))

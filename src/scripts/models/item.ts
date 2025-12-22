@@ -205,11 +205,13 @@ export function fetchItemsIntermediate(): ItemActionTypes {
 export async function insertItems(items: RSSItem[]): Promise<RSSItem[]> {
     items.sort((a, b) => a.date.getTime() - b.date.getTime())
     const rows = items.map(item => db.items.createRow(item))
-    return (await db.itemsDB
+    const inserted = (await db.itemsDB
         .insert()
         .into(db.items)
         .values(rows)
         .exec()) as RSSItem[]
+    inserted.sort((a, b) => a.date.getTime() - b.date.getTime() || a._id - b._id)
+    return inserted
 }
 
 export function fetchItems(
@@ -270,7 +272,7 @@ export function fetchItems(
                         dispatch(
                             fetchItemsSuccess(
                                 sortDirection === 0
-                                    ? inserted.reverse()
+                                    ? [...inserted].reverse()
                                     : inserted,
                                 getState().items
                             )
