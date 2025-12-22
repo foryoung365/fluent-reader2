@@ -121,11 +121,15 @@ export class RSSFeed {
     static async loadFeed(feed: RSSFeed, skip = 0): Promise<RSSItem[]> {
         const predicates = FeedFilter.toPredicates(feed.filter)
         predicates.push(db.items.source.in(feed.sids))
+        const sortDirection = window.settings.getSortDirection()
         return (await db.itemsDB
             .select()
             .from(db.items)
             .where(lf.op.and.apply(null, predicates))
-            .orderBy(db.items.date, lf.Order.DESC)
+            .orderBy(
+                db.items.date,
+                sortDirection === 0 ? lf.Order.DESC : lf.Order.ASC
+            )
             .skip(skip)
             .limit(LOAD_QUANTITY)
             .exec()) as RSSItem[]
@@ -378,11 +382,16 @@ export function feedReducer(
                                 let oldItems = feed.iids.map(
                                     id => action.itemState[id]
                                 )
+                                const sortDirection = window.settings.getSortDirection()
                                 let nextItems = mergeSortedArrays(
                                     oldItems,
                                     items,
                                     (a, b) =>
-                                        b.date.getTime() - a.date.getTime()
+                                        sortDirection === 0
+                                            ? b.date.getTime() -
+                                            a.date.getTime()
+                                            : a.date.getTime() -
+                                            b.date.getTime()
                                 )
                                 nextState[feed._id] = {
                                     ...feed,
@@ -486,13 +495,13 @@ export function feedReducer(
                 case PageType.AllArticles:
                     return action.init
                         ? {
-                              ...state,
-                              [ALL]: {
-                                  ...state[ALL],
-                                  loaded: false,
-                                  filter: action.filter,
-                              },
-                          }
+                            ...state,
+                            [ALL]: {
+                                ...state[ALL],
+                                loaded: false,
+                                filter: action.filter,
+                            },
+                        }
                         : state
                 default:
                     return state

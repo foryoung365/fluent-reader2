@@ -182,11 +182,16 @@ export function showOffsetItem(offset: number): AppThunk {
         let newIndex = itemIndex + offset
         if (itemIndex < 0) {
             let item = state.items[itemId]
+            const sortDirection = window.settings.getSortDirection()
             let prevs = feed.iids
                 .map(
                     (id, index) => [state.items[id], index] as [RSSItem, number]
                 )
-                .filter(([i, _]) => i.date > item.date)
+                .filter(([i, _]) =>
+                    sortDirection === 0
+                        ? i.date > item.date
+                        : i.date < item.date
+                )
             if (prevs.length > 0) {
                 let prev = prevs[0]
                 for (let j = 1; j < prevs.length; j += 1) {
@@ -333,8 +338,8 @@ export function pageReducer(
                         ...state,
                         itemId:
                             action.feed._id === state.feedId &&
-                            action.items.filter(i => i._id === state.itemId)
-                                .length === 0
+                                action.items.filter(i => i._id === state.itemId)
+                                    .length === 0
                                 ? null
                                 : state.itemId,
                     }

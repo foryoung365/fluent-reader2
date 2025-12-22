@@ -131,6 +131,13 @@ const settingsBridge = {
     setAll: configs => {
         ipcRenderer.invoke("import-all-settings", configs)
     },
+
+    getSortDirection: (): number => {
+        return ipcRenderer.sendSync("get-sort-direction")
+    },
+    setSortDirection: (direction: number) => {
+        ipcRenderer.invoke("set-sort-direction", direction)
+    },
 }
 
 declare global {

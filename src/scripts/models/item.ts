@@ -232,17 +232,17 @@ export function fetchItems(
             let sources =
                 sids === null
                     ? Object.values(sourcesState).filter(s => {
-                          let last = s.lastFetched ? s.lastFetched.getTime() : 0
-                          return (
-                              !s.serviceRef &&
-                              (last > timenow ||
-                                  last + (s.fetchFrequency || 0) * 60000 <=
-                                      timenow)
-                          )
-                      })
+                        let last = s.lastFetched ? s.lastFetched.getTime() : 0
+                        return (
+                            !s.serviceRef &&
+                            (last > timenow ||
+                                last + (s.fetchFrequency || 0) * 60000 <=
+                                timenow)
+                        )
+                    })
                     : sids
-                          .map(sid => sourcesState[sid])
-                          .filter(s => !s.serviceRef)
+                        .map(sid => sourcesState[sid])
+                        .filter(s => !s.serviceRef)
             for (let source of sources) {
                 let promise = RSSSource.fetchItems(source)
                 promise.then(() =>
@@ -266,9 +266,12 @@ export function fetchItems(
                 })
                 insertItems(items)
                     .then(inserted => {
+                        const sortDirection = window.settings.getSortDirection()
                         dispatch(
                             fetchItemsSuccess(
-                                inserted.reverse(),
+                                sortDirection === 0
+                                    ? inserted.reverse()
+                                    : inserted,
                                 getState().items
                             )
                         )

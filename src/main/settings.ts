@@ -204,3 +204,11 @@ ipcMain.on("get-nedb-status", event => {
 ipcMain.handle("set-nedb-status", (_, flag: boolean) => {
     store.set(NEDB_STATUS_STORE_KEY, flag)
 })
+
+const SORT_DIRECTION_STORE_KEY = "sortDirection"
+ipcMain.on("get-sort-direction", event => {
+    event.returnValue = store.get(SORT_DIRECTION_STORE_KEY, 0)
+})
+ipcMain.handle("set-sort-direction", (_, direction: number) => {
+    store.set(SORT_DIRECTION_STORE_KEY, direction)
+})

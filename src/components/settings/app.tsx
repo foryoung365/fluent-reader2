@@ -31,6 +31,7 @@ type AppTabProps = {
     setFetchInterval: (interval: number) => void
     deleteArticles: (days: number) => Promise<void>
     importAll: () => Promise<void>
+    setSortDirection: (direction: number) => void
 }
 
 type AppTabState = {
@@ -40,6 +41,7 @@ type AppTabState = {
     itemSize: string
     cacheSize: string
     deleteIndex: string
+    sortDirection: number
 }
 
 class AppTab extends React.Component<AppTabProps, AppTabState> {
@@ -52,6 +54,7 @@ class AppTab extends React.Component<AppTabProps, AppTabState> {
             itemSize: null,
             cacheSize: null,
             deleteIndex: null,
+            sortDirection: window.settings.getSortDirection(),
         }
         this.getItemSize()
         this.getCacheSize()
@@ -91,6 +94,15 @@ class AppTab extends React.Component<AppTabProps, AppTabState> {
     ]
     onFetchIntervalChanged = (item: IDropdownOption) => {
         this.props.setFetchInterval(item.key as number)
+    }
+
+    sortDirectionOptions = (): IDropdownOption[] => [
+        { key: 0, text: intl.get("app.newestFirst") },
+        { key: 1, text: intl.get("app.oldestFirst") },
+    ]
+    onSortDirectionChanged = (item: IDropdownOption) => {
+        this.props.setSortDirection(item.key as number)
+        this.setState({ sortDirection: item.key as number })
     }
 
     searchEngineOptions = (): IDropdownOption[] =>
@@ -203,6 +215,18 @@ class AppTab extends React.Component<AppTabProps, AppTabState> {
                         defaultSelectedKey={window.settings.getFetchInterval()}
                         options={this.fetchIntervalOptions()}
                         onChanged={this.onFetchIntervalChanged}
+                        style={{ width: 200 }}
+                    />
+                </Stack.Item>
+            </Stack>
+
+            <Label>{intl.get("app.articleSorting")}</Label>
+            <Stack horizontal>
+                <Stack.Item>
+                    <Dropdown
+                        defaultSelectedKey={this.state.sortDirection}
+                        options={this.sortDirectionOptions()}
+                        onChanged={this.onSortDirectionChanged}
                         style={{ width: 200 }}
                     />
                 </Stack.Item>

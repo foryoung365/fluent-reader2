@@ -5,6 +5,7 @@ import {
     setupAutoFetch,
 } from "../../scripts/models/app"
 import * as db from "../../scripts/db"
+import { initFeeds } from "../../scripts/models/feed"
 import AppTab from "../../components/settings/app"
 import { importAll } from "../../scripts/settings"
 import { updateUnreadCounts } from "../../scripts/models/source"
@@ -18,6 +19,10 @@ const mapDispatchToProps = (dispatch: AppDispatch) => ({
     setFetchInterval: (interval: number) => {
         window.settings.setFetchInterval(interval)
         dispatch(setupAutoFetch())
+    },
+    setSortDirection: (direction: number) => {
+        window.settings.setSortDirection(direction)
+        dispatch(initFeeds(true))
     },
     deleteArticles: async (days: number) => {
         dispatch(saveSettings())
