@@ -249,6 +249,7 @@
         "aiApiKey": "API Key",
         "aiApiUrl": "API Base URL (Optional)",
         "aiModel": "Model",
+        "autoSummary": "Auto Summary",
         "testConnection": "Test Connection",
         "testSuccess": "Connection successful!",
         "testFailure": "Connection failed: {message}",

@@ -339,6 +339,11 @@ class AppTab extends React.Component<AppTabProps, AppTabState> {
                         value={this.state.aiSettings.apiKey}
                         onChange={(_, val) => this.onAISettingsChange({ apiKey: val })}
                     />
+                    <Toggle
+                        label={intl.get("app.autoSummary")}
+                        checked={this.state.aiSettings.autoSummary}
+                        onChanged={val => this.onAISettingsChange({ autoSummary: val })}
+                    />
                     <TextField
                         label={intl.get("app.aiApiUrl")}
                         placeholder="https://api.openai.com/v1"

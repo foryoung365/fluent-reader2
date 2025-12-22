@@ -262,6 +262,18 @@ class Article extends React.Component<ArticleProps, ArticleState> {
         this.setState({ loaded: true })
         if (this.state.aiSummaryEnabled && !this.state.loadWebpage) {
             this.injectAIUI()
+
+            // Auto generation logic
+            const settings = window.settings.getAISettings()
+            if (settings.autoSummary && this.state.aiSummary === "" && !this.state.aiLoading) {
+                const content = this.state.loadFull ? this.state.fullContent : this.props.item.content
+                const tmp = document.createElement("div")
+                tmp.innerHTML = content
+                const plainText = tmp.textContent || tmp.innerText || ""
+                if (plainText.length > 500) {
+                    this.generateSummary()
+                }
+            }
         }
     }
 

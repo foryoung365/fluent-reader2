@@ -223,6 +223,7 @@ ipcMain.on("get-ai-settings", event => {
         apiKey: "",
         apiUrl: "",
         model: "gpt-3.5-turbo",
+        autoSummary: false,
     })
 })
 ipcMain.handle("set-ai-settings", (_, settings: AISettings) => {

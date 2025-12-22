@@ -93,6 +93,7 @@ export interface AISettings {
     apiKey: string
     apiUrl: string
     model: string
+    autoSummary: boolean
 }
 
 export type SchemaTypes = {

@@ -11,7 +11,7 @@ export function setAIListeners() {
             })
 
             const systemPrompt = "You are a helpful assistant that summarizes RSS articles."
-            const userPrompt = `Please provide a detailed summary of the following article titled "${title}". Use the same language as the article content.\n\nContent:\n${content}`
+            const userPrompt = `Please provide a concise summary of the following article titled "${title}". Use the same language as the article content.\n\nContent:\n${content}`
 
             const response = await client.chat.completions.create({
                 model: settings.model || (settings.provider === AIProvider.Gemini ? "gemini-flash-latest" : "gpt-5-mini"),
