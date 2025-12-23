@@ -234,12 +234,12 @@ export const gReaderServiceHooks: ServiceHooks = {
             if (items.length < configs.fetchLimit || !continuation) {
                 configs.lastId = items[0].id
                 configs.lastFetched = Math.round(
-                    items[0].fetchedDate.getTime() / 1000
+                    parseInt(items[0].crawlTimeMsec) / 1000
                 )
             } else {
                 configs.lastId = items[items.length - 1].id
                 configs.lastFetched = Math.round(
-                    items[items.length - 1].fetchedDate.getTime() / 1000
+                    parseInt(items[items.length - 1].crawlTimeMsec) / 1000
                 )
             }
             const fidMap = new Map<string, RSSSource>()
