@@ -315,6 +315,7 @@ class Article extends React.Component<ArticleProps, ArticleState> {
 
     generateSummary = async () => {
         if (this.state.aiLoading) return
+        const currentItemId = this.props.item._id
         this.setState({ aiLoading: true }, () => {
             this.injectAIUI()
         })
@@ -330,9 +331,11 @@ class Article extends React.Component<ArticleProps, ArticleState> {
 
         const summary = await window.utils.generateSummary(settings, title, plainText)
 
-        this.setState({ aiSummary: summary, aiLoading: false }, () => {
-            this.injectAIUI()
-        })
+        if (this.props.item._id === currentItemId) {
+            this.setState({ aiSummary: summary, aiLoading: false }, () => {
+                this.injectAIUI()
+            })
+        }
     }
     webviewError = (reason: string) => {
         this.setState({ error: true, errorDescription: reason })
