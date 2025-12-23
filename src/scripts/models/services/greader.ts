@@ -229,8 +229,19 @@ export const gReaderServiceHooks: ServiceHooks = {
                 break
             }
         } while (continuation && items.length < configs.fetchLimit)
+
         if (items.length > 0) {
-            configs.lastId = items[0].id
+            if (items.length < configs.fetchLimit || !continuation) {
+                configs.lastId = items[0].id
+                configs.lastFetched = Math.round(
+                    items[0].fetchedDate.getTime() / 1000
+                )
+            } else {
+                configs.lastId = items[items.length - 1].id
+                configs.lastFetched = Math.round(
+                    items[items.length - 1].fetchedDate.getTime() / 1000
+                )
+            }
             const fidMap = new Map<string, RSSSource>()
             for (let source of Object.values(state.sources)) {
                 if (source.serviceRef) {
@@ -313,11 +324,6 @@ export const gReaderServiceHooks: ServiceHooks = {
                 }
                 parsedItems.push(item)
             })
-            if (parsedItems.length > 0) {
-                configs.lastFetched = Math.round(
-                    parsedItems[0].fetchedDate.getTime() / 1000
-                )
-            }
             return [parsedItems, configs]
         } else {
             return [[], configs]

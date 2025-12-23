@@ -203,8 +203,29 @@ export function fetchItemsIntermediate(): ItemActionTypes {
 }
 
 export async function insertItems(items: RSSItem[]): Promise<RSSItem[]> {
-    items.sort((a, b) => a.date.getTime() - b.date.getTime())
-    const rows = items.map(item => db.items.createRow(item))
+    const checkPromises = items.map(async i => {
+        const predicate = i.serviceRef
+            ? db.items.serviceRef.eq(i.serviceRef)
+            : i.link
+                ? lf.op.and(db.items.source.eq(i.source), db.items.link.eq(i.link))
+                : lf.op.and(
+                    db.items.source.eq(i.source),
+                    db.items.title.eq(i.title),
+                    db.items.date.eq(i.date)
+                )
+        const existing = await db.itemsDB
+            .select()
+            .from(db.items)
+            .where(predicate)
+            .limit(1)
+            .exec()
+        return existing.length === 0 ? i : null
+    })
+    const newItems = (await Promise.all(checkPromises)).filter(i => i !== null)
+    if (newItems.length === 0) return []
+
+    newItems.sort((a, b) => a.date.getTime() - b.date.getTime())
+    const rows = newItems.map(item => db.items.createRow(item))
     const inserted = (await db.itemsDB
         .insert()
         .into(db.items)

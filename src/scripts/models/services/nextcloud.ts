@@ -154,22 +154,34 @@ export const nextcloudServiceHooks: ServiceHooks = {
             const response = await fetchAPI(
                 configs,
                 "/items/updated?lastModified=" +
-                    configs.lastModified +
-                    "&type=3"
+                configs.lastModified +
+                "&type=3"
             )
             if (response.status !== 200) throw APIError()
             lastFetched = (await response.json()).items
             items.push(...lastFetched.filter(i => i.id > configs.lastId))
         }
-        configs.lastModified = items.reduce(
-            (m, n) => Math.max(m, n.lastModified),
-            configs.lastModified
-        )
-        configs.lastId = items.reduce(
-            (m, n) => Math.max(m, n.id),
-            configs.lastId
-        )
-        configs.lastModified++ //+1 to avoid fetching articles with same lastModified next time
+        if (items.length < configs.fetchLimit || (lastFetched && lastFetched.items && lastFetched.items.length < 125)) {
+            configs.lastModified = items.reduce(
+                (m, n) => Math.max(m, n.lastModified),
+                configs.lastModified
+            )
+            configs.lastId = items.reduce(
+                (m, n) => Math.max(m, n.id),
+                configs.lastId
+            )
+            configs.lastModified++ //+1 to avoid fetching articles with same lastModified next time
+        } else {
+            // If limit reached, we use the oldest to ensure no gap
+            configs.lastModified = items.reduce(
+                (m, n) => Math.min(m, n.lastModified),
+                configs.lastModified
+            )
+            configs.lastId = items.reduce(
+                (m, n) => Math.min(m, n.id),
+                configs.lastId
+            )
+        }
         if (items.length > 0) {
             const fidMap = new Map<string, RSSSource>()
             for (let source of Object.values(state.sources)) {

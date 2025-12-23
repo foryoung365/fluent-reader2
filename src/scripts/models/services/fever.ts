@@ -110,10 +110,17 @@ export const feverServiceHooks: ServiceHooks = {
             (response === undefined || response.items.length >= 50) &&
             items.length < configs.fetchLimit
         )
-        configs.lastId = items.reduce(
-            (m, n) => Math.max(m, n.id),
-            configs.lastId
-        )
+        if (items.length < configs.fetchLimit || response.items.length < 50) {
+            configs.lastId = items.reduce(
+                (m, n) => Math.max(m, n.id),
+                configs.lastId
+            )
+        } else {
+            configs.lastId = items.reduce(
+                (m, n) => Math.min(m, n.id),
+                configs.lastId
+            )
+        }
         if (items.length > 0) {
             const fidMap = new Map<string, RSSSource>()
             for (let source of Object.values(state.sources)) {

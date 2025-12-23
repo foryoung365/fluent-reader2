@@ -147,10 +147,17 @@ export const feedbinServiceHooks: ServiceHooks = {
             lastFetched.length >= 125 &&
             items.length < configs.fetchLimit
         )
-        configs.lastId = items.reduce(
-            (m, n) => Math.max(m, n.id),
-            configs.lastId
-        )
+        if (items.length < configs.fetchLimit || (lastFetched && lastFetched.length < 125)) {
+            configs.lastId = items.reduce(
+                (m, n) => Math.max(m, n.id),
+                configs.lastId
+            )
+        } else {
+            configs.lastId = items.reduce(
+                (m, n) => Math.min(m, n.id),
+                configs.lastId
+            )
+        }
         if (items.length > 0) {
             const fidMap = new Map<string, RSSSource>()
             for (let source of Object.values(state.sources)) {

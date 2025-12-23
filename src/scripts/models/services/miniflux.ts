@@ -169,7 +169,11 @@ export const minifluxServiceHooks: ServiceHooks = {
 
         // break/return nothing if no new items acquired
         if (items.length === 0) return [[], configs]
-        configs.lastId = items[0].id
+        if (items.length < configs.fetchLimit || entriesResponse.total < quantity) {
+            configs.lastId = items[0].id
+        } else {
+            configs.lastId = items[items.length - 1].id
+        }
 
         // get sources that possess ref/id given by service, associate new items
         const sourceMap = new Map<string, RSSSource>()
