@@ -10,7 +10,7 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
 
             - name: Build and package the app
               run: |
@@ -20,20 +20,11 @@ jobs:
 
             - name: Get app version
               id: package-version
-              uses: martinbeentjes/npm-get-version-action@master
+              run: |
+                  PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')
+                  echo "current-version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
 
-            - name: Get release
-              id: get_release
-              uses: bruceadams/get-release@v1.2.0
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Upload AppImage to release assets
-              uses: actions/upload-release-asset@v1
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Upload to Release
+              uses: softprops/action-gh-release@v2
               with:
-                  upload_url: ${{ steps.get_release.outputs.upload_url }}
-                  asset_path: ./bin/linux/x64/Fluent Reader-${{ steps.package-version.outputs.current-version }}.AppImage
-                  asset_name: Fluent.Reader.${{ steps.package-version.outputs.current-version }}.AppImage
-                  asset_content_type: application/octet-stream
+                  files: ./bin/linux/x64/Fluent Reader-${{ steps.package-version.outputs.current-version }}.AppImage
