@@ -253,6 +253,9 @@
         "testConnection": "Test Connection",
         "testSuccess": "Connection successful!",
         "testFailure": "Connection failed: {message}",
-        "aiHint": "Summaries are generated via the article view. Costs may apply to your AI account."
+        "aiHint": "Summaries are generated via the article view. Costs may apply to your AI account.",
+        "enableAITranslate": "Enable AI translation",
+        "targetLanguage": "Target Language",
+        "autoTranslate": "Automatically translate if >20% content is in other languages"
     }
 }

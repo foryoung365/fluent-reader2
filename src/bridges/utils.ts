@@ -175,8 +175,11 @@ const utilsBridge = {
     initFontList: (): Promise<Array<string>> => {
         return ipcRenderer.invoke("init-font-list")
     },
-    generateSummary: (settings: AISettings, title: string, content: string): Promise<string> => {
-        return ipcRenderer.invoke("generate-ai-summary", settings, title, content)
+    generateSummary: (settings: AISettings, title: string, content: string, targetLanguage: string): Promise<string> => {
+        return ipcRenderer.invoke("generate-ai-summary", settings, title, content, targetLanguage)
+    },
+    generateTranslation: (settings: AISettings, targetLanguage: string, jsonContent: string): Promise<string> => {
+        return ipcRenderer.invoke("generate-ai-translation", settings, targetLanguage, jsonContent)
     },
     testAISettings: (settings: AISettings): Promise<{ success: boolean; message?: string }> => {
         return ipcRenderer.invoke("test-ai-settings", settings)

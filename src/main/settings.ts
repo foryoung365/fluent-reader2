@@ -225,14 +225,18 @@ ipcMain.handle("set-sort-direction", (_, direction: number) => {
 
 const AI_SETTINGS_STORE_KEY = "aiSettings"
 ipcMain.on("get-ai-settings", event => {
-    event.returnValue = store.get(AI_SETTINGS_STORE_KEY, {
+    const defaults = {
         enabled: false,
         provider: AIProvider.OpenAI,
         apiKey: "",
         apiUrl: "",
         model: "gpt-3.5-turbo",
         autoSummary: false,
-    })
+        translateEnabled: false,
+        targetLanguage: app.getLocale(),
+    }
+    const stored = (store.get(AI_SETTINGS_STORE_KEY as any) || {}) as any
+    event.returnValue = { ...defaults, ...stored }
 })
 ipcMain.handle("set-ai-settings", (_, settings: AISettings) => {
     store.set(AI_SETTINGS_STORE_KEY, settings)

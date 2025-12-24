@@ -22,6 +22,7 @@ import { shareSubmenu } from "./context-menu"
 import { platformCtrl, decodeFetchResponse } from "../scripts/utils"
 
 const FONT_SIZE_OPTIONS = [12, 13, 14, 15, 16, 17, 18, 19, 20]
+const LanguageDetect = require("languagedetect")
 
 type ArticleProps = {
     item: RSSItem
@@ -54,6 +55,8 @@ type ArticleState = {
     aiSummary: string
     aiLoading: boolean
     aiSummaryEnabled: boolean
+    aiTranslateLoading: boolean
+    aiTranslationMap: { [key: string]: string }
 }
 
 class Article extends React.Component<ArticleProps, ArticleState> {
@@ -73,6 +76,8 @@ class Article extends React.Component<ArticleProps, ArticleState> {
             aiSummary: "",
             aiLoading: false,
             aiSummaryEnabled: window.settings.getAISettings().enabled,
+            aiTranslateLoading: false,
+            aiTranslationMap: {},
         }
         window.utils.addWebviewContextListener(this.contextMenuHandler)
         window.utils.addWebviewKeydownListener(this.keyDownHandler)
@@ -274,7 +279,155 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                     this.generateSummary()
                 }
             }
+
+            // AI Translation logic
+            if (settings.translateEnabled && Object.keys(this.state.aiTranslationMap).length === 0 && !this.state.aiTranslateLoading) {
+                this.checkAndTranslate()
+            }
         }
+    }
+
+    checkAndTranslate = async () => {
+        const settings = window.settings.getAISettings()
+        if (!settings.translateEnabled) {
+            console.log("[AI Translate] Translation disabled in settings.")
+            return
+        }
+
+        const content = this.state.loadFull ? this.state.fullContent : this.props.item.content
+        const tmp = document.createElement("div")
+        tmp.innerHTML = content
+        const plainText = tmp.textContent || tmp.innerText || ""
+        console.log(`[AI Translate] Article length: ${plainText.length}`)
+
+        const lngDetector = new LanguageDetect()
+
+        // Split text into chunks to check density
+        const chunks = plainText.match(/[^.!?\n]+[.!?\n]*/g) || [plainText]
+        const targetMap = {
+            "zh": "chinese", "zh-CN": "chinese", "zh-TW": "chinese",
+            "en": "english", "en-US": "english",
+            "ja": "japanese", "ko": "korean",
+            "fr": "french", "fr-FR": "french",
+            "de": "german", "es": "spanish", "ru": "russian",
+        }
+
+        const targetLangCode = settings.targetLanguage || this.props.locale || "en-US"
+        const targetName = targetMap[targetLangCode] || targetMap[targetLangCode.split("-")[0]]
+        console.log(`[AI Translate] Target language code: ${targetLangCode}, target name: ${targetName}`)
+
+        let nonTargetCount = 0
+        let totalChecked = 0
+
+        for (const chunk of chunks) {
+            const trimmed = chunk.trim()
+            if (trimmed.length < 20) continue
+            totalChecked++
+            const detected = lngDetector.detect(trimmed, 1)
+            const topResult = detected[0]
+
+            if (topResult) {
+                // If detected language is not target and confidence is high enough
+                if (topResult[0] !== targetName && topResult[1] > 0.1) {
+                    nonTargetCount++
+                    console.log(`[AI Translate] Chunk "${trimmed.substring(0, 30)}..." detected as ${topResult[0]} (conf: ${topResult[1].toFixed(2)}), not target.`)
+                } else {
+                    console.log(`[AI Translate] Chunk "${trimmed.substring(0, 30)}..." detected as ${topResult[0]} (conf: ${topResult[1].toFixed(2)}), matches target or low confidence.`)
+                }
+            } else {
+                // If detection fails (common for CJK with this library)
+                // If target is CJK, and detection failed, we assume it's NOT the target language
+                // and thus needs translation. This is a simple strategy to trigger translation for CJK.
+                if (targetName === "chinese" || targetName === "japanese" || targetName === "korean") {
+                    nonTargetCount++
+                    console.log(`[AI Translate] Chunk "${trimmed.substring(0, 30)}..." detection failed, target is CJK. Assuming non-target.`)
+                } else {
+                    // If detection fails and target is not CJK, also assume non-target.
+                    nonTargetCount++
+                    console.log(`[AI Translate] Chunk "${trimmed.substring(0, 30)}..." detection failed, target is non-CJK. Assuming non-target.`)
+                }
+            }
+        }
+
+        const nonTargetRatio = totalChecked > 0 ? nonTargetCount / totalChecked : 0
+        console.log(`[AI Translate] Detection: target=${targetName}, ratio=${nonTargetRatio.toFixed(2)} (${nonTargetCount}/${totalChecked})`)
+
+        if (nonTargetRatio > 0.2) {
+            console.log("[AI Translate] Triggering translation...")
+            this.performTranslation(tmp, targetLangCode)
+        }
+    }
+
+    performTranslation = async (root: HTMLElement, targetLang: string) => {
+        this.setState({ aiTranslateLoading: true })
+        // Use the article tag if present, otherwise fallout to root
+        const article = root.querySelector("article") || root
+        const elements = article.querySelectorAll("p, li, h1, h2, h3, h4, h5, h6")
+        const jsonToTranslate: { [key: string]: string } = {}
+        let count = 0
+
+        elements.forEach((el, index) => {
+            const text = el.textContent.trim()
+            if (text.length > 10) {
+                jsonToTranslate[index.toString()] = text
+                count++
+            }
+        })
+
+        if (count === 0) {
+            this.setState({ aiTranslateLoading: false })
+            return
+        }
+
+        const settings = window.settings.getAISettings()
+        console.log(`[AI Translate] Calling API for ${count} elements...`)
+        const resultJson = await window.utils.generateTranslation(settings, targetLang, JSON.stringify(jsonToTranslate))
+        console.log(`[AI Translate] API Response length: ${resultJson.length}`)
+
+        try {
+            const translatedMap = JSON.parse(resultJson)
+            console.log(`[AI Translate] Parsed map keys: ${Object.keys(translatedMap).length}`)
+            this.setState({ aiTranslationMap: translatedMap, aiTranslateLoading: false }, () => {
+                this.injectTranslationUI()
+            })
+        } catch (e) {
+            console.error("Failed to parse translation result", e)
+            this.setState({ aiTranslateLoading: false })
+        }
+    }
+
+    injectTranslationUI = () => {
+        const map = this.state.aiTranslationMap
+        if (Object.keys(map).length === 0) return
+
+        const script = `
+            (function() {
+                var article = document.querySelector("article");
+                if (!article) {
+                    console.log("[AI Translate Webview] No article tag found yet");
+                    return;
+                }
+                var elements = article.querySelectorAll("p, li, h1, h2, h3, h4, h5, h6");
+                var map = ${JSON.stringify(map)};
+                var injectedCount = 0;
+                for (var index in map) {
+                    var el = elements[parseInt(index)];
+                    if (el && !el.nextElementSibling?.classList.contains("ai-translation")) {
+                        var transEl = document.createElement(el.tagName === "LI" ? "div" : el.tagName);
+                        transEl.className = "ai-translation";
+                        transEl.innerText = map[index];
+                        if (el.tagName === "LI") {
+                            el.appendChild(transEl);
+                        } else {
+                            el.insertAdjacentElement('afterend', transEl);
+                        }
+                        injectedCount++;
+                    }
+                }
+                console.log("[AI Translate Webview] Injected " + injectedCount + " translations");
+            })();
+        `
+        this.webview.executeJavaScript(script)
     }
 
     injectAIUI = () => {
@@ -321,6 +474,7 @@ class Article extends React.Component<ArticleProps, ArticleState> {
         })
 
         const settings = window.settings.getAISettings()
+        const targetLang = settings.targetLanguage || this.props.locale || "en-US"
         const title = this.props.item.title
         const content = this.state.loadFull ? this.state.fullContent : this.props.item.content
 
@@ -329,7 +483,7 @@ class Article extends React.Component<ArticleProps, ArticleState> {
         tmp.innerHTML = content
         const plainText = tmp.textContent || tmp.innerText || ""
 
-        const summary = await window.utils.generateSummary(settings, title, plainText)
+        const summary = await window.utils.generateSummary(settings, title, plainText, targetLang)
 
         if (this.props.item._id === currentItemId) {
             this.setState({ aiSummary: summary, aiLoading: false }, () => {
@@ -372,14 +526,21 @@ class Article extends React.Component<ArticleProps, ArticleState> {
     }
     componentDidUpdate = (prevProps: ArticleProps) => {
         if (prevProps.item._id != this.props.item._id) {
+            const settings = window.settings.getAISettings()
             this.setState({
                 loadWebpage:
                     this.props.source.openTarget === SourceOpenTarget.Webpage,
                 loadFull:
                     this.props.source.openTarget ===
                     SourceOpenTarget.FullContent,
+                fullContent: "",
+                loaded: false,
+                error: false,
                 aiSummary: "",
                 aiLoading: false,
+                aiSummaryEnabled: settings.enabled,
+                aiTranslateLoading: false,
+                aiTranslationMap: {},
             })
             if (this.props.source.openTarget === SourceOpenTarget.FullContent)
                 this.loadFull()
@@ -469,6 +630,8 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                         }
                         .ai-summary-title { font-weight: 600; margin-top: 0; margin-bottom: 8px; font-size: 12px; color: var(--gray); text-transform: uppercase; }
                         .ai-summary-loading { color: var(--gray); font-size: 13px; margin: 12px 0; }
+                        .ai-translation { color: var(--primary); font-size: 0.9em; margin-top: 4px; border-left: 2px solid var(--primary-light); padding-left: 8px; opacity: 0.8; }
+                        li .ai-translation { display: block; margin-top: 2px; border-left: none; padding-left: 0; font-style: italic; }
                     ` }} />
                     <div id="ai-summary-container"></div>
                     <article></article>

@@ -196,7 +196,13 @@ class AppTab extends React.Component<AppTabProps, AppTabState> {
     ]
 
     onAISettingsChange = (newSettings: Partial<AISettings>) => {
-        const aiSettings = { ...this.state.aiSettings, ...newSettings }
+        const aiSettings = {
+            translateEnabled: false,
+            targetLanguage: window.settings.getCurrentLocale(),
+            autoSummary: false,
+            ...this.state.aiSettings,
+            ...newSettings
+        }
         window.settings.setAISettings(aiSettings)
         this.setState({ aiSettings, testResult: "" })
     }
@@ -368,6 +374,27 @@ class AppTab extends React.Component<AppTabProps, AppTabState> {
                             </span>
                         )}
                     </Stack>
+
+                    <Label>{intl.get("app.enableAITranslate")}</Label>
+                    <Toggle
+                        checked={this.state.aiSettings.translateEnabled}
+                        onChange={(_, checked) => this.onAISettingsChange({ translateEnabled: checked })}
+                    />
+                    {this.state.aiSettings.translateEnabled && (
+                        <>
+                            <Label>{intl.get("app.targetLanguage")}</Label>
+                            <Dropdown
+                                selectedKey={this.state.aiSettings.targetLanguage}
+                                options={this.languageOptions()}
+                                onChanged={opt => this.onAISettingsChange({ targetLanguage: opt.key as string })}
+                                style={{ width: 200 }}
+                            />
+                            <span className="settings-hint">
+                                {intl.get("app.autoTranslate")}
+                            </span>
+                        </>
+                    )}
+
                     <span className="settings-hint">
                         {intl.get("app.aiHint")}
                     </span>

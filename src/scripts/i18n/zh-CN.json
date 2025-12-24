@@ -251,6 +251,9 @@
         "testConnection": "测试连接",
         "testSuccess": "连接成功！",
         "testFailure": "连接失败：{message}",
-        "aiHint": "摘要在文章视图中按需生成。调用 AI 可能会产生账户费用。"
+        "aiHint": "摘要在文章视图中按需生成。调用 AI 可能会产生账户费用。",
+        "enableAITranslate": "启用 AI 翻译",
+        "targetLanguage": "目标语言",
+        "autoTranslate": "超过 20% 非目标语言内容时自动翻译"
     }
 }

@@ -51,6 +51,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "languagedetect": "^2.0.0",
     "marked": "^17.0.1",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "openai": "^6.15.0"

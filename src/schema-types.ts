@@ -94,6 +94,8 @@ export interface AISettings {
     apiUrl: string
     model: string
     autoSummary: boolean
+    translateEnabled: boolean
+    targetLanguage: string
 }
 
 export type SchemaTypes = {
