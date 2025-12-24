@@ -352,7 +352,7 @@ export const gReaderServiceHooks: ServiceHooks = {
                 .exec()
             const refs = rows.map(row => row["serviceRef"]).join("&i=")
             if (refs) {
-                editTag(getState().service as GReaderConfigs, refs, READ_TAG)
+                await editTag(getState().service as GReaderConfigs, refs, READ_TAG)
             }
         } else {
             const sources = sids.map(sid => state.sources[sid])
@@ -360,7 +360,7 @@ export const gReaderServiceHooks: ServiceHooks = {
                 if (source.serviceRef) {
                     const body = new URLSearchParams()
                     body.set("s", source.serviceRef)
-                    fetchAPI(
+                    await fetchAPI(
                         configs,
                         "/reader/api/0/mark-all-as-read",
                         "POST",

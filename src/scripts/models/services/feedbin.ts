@@ -249,7 +249,7 @@ export const feedbinServiceHooks: ServiceHooks = {
             .where(query)
             .exec()
         const refs = rows.map(row => parseInt(row["serviceRef"]))
-        markItems(configs, "unread", "DELETE", refs)
+        await markItems(configs, "unread", "DELETE", refs)
     },
 
     markRead: (item: RSSItem) => async (_, getState) => {

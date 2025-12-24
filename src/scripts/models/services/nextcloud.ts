@@ -269,7 +269,7 @@ export const nextcloudServiceHooks: ServiceHooks = {
             .where(query)
             .exec()
         const refs = rows.map(row => parseInt(row["serviceRef"]))
-        markItems(configs, "unread", "POST", refs)
+        await markItems(configs, "unread", "POST", refs)
     },
 
     markRead: (item: RSSItem) => async (_, getState) => {

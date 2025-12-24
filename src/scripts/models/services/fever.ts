@@ -205,7 +205,7 @@ export const feverServiceHooks: ServiceHooks = {
                 .filter(i => !i.hasRead && i.date.getTime() >= date.getTime())
             for (let item of items) {
                 if (item.serviceRef) {
-                    markItem(configs, item, "read")
+                    await markItem(configs, item, "read")
                 }
             }
         } else {
@@ -214,7 +214,7 @@ export const feverServiceHooks: ServiceHooks = {
                 Math.floor((date ? date.getTime() : Date.now()) / 1000) + 1
             for (let source of sources) {
                 if (source.serviceRef) {
-                    fetchAPI(
+                    await fetchAPI(
                         configs,
                         "",
                         `&mark=feed&as=read&id=${source.serviceRef}&before=${timestamp}`
