@@ -337,8 +337,8 @@ const markUnreadDone = (item: RSSItem): ItemActionTypes => ({
     item: item,
 })
 
-export function markRead(item: RSSItem): AppThunk {
-    return (dispatch, getState) => {
+export function markRead(item: RSSItem): AppThunk<Promise<void>> {
+    return async (dispatch, getState) => {
         item = getState().items[item._id]
         if (!item.hasRead) {
             db.itemsDB
@@ -348,7 +348,8 @@ export function markRead(item: RSSItem): AppThunk {
                 .exec()
             dispatch(markReadDone(item))
             if (item.serviceRef) {
-                dispatch(dispatch(getServiceHooks()).markRead?.(item))
+                const action = dispatch(getServiceHooks()).markRead?.(item)
+                if (action) await dispatch(action)
             }
         }
     }
@@ -403,8 +404,8 @@ export function markAllRead(
     }
 }
 
-export function markUnread(item: RSSItem): AppThunk {
-    return (dispatch, getState) => {
+export function markUnread(item: RSSItem): AppThunk<Promise<void>> {
+    return async (dispatch, getState) => {
         item = getState().items[item._id]
         if (item.hasRead) {
             db.itemsDB
@@ -414,7 +415,8 @@ export function markUnread(item: RSSItem): AppThunk {
                 .exec()
             dispatch(markUnreadDone(item))
             if (item.serviceRef) {
-                dispatch(dispatch(getServiceHooks()).markUnread?.(item))
+                const action = dispatch(getServiceHooks()).markUnread?.(item)
+                if (action) await dispatch(action)
             }
         }
     }

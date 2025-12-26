@@ -1,4 +1,6 @@
 import intl from "react-intl-universal"
+import * as db from "../../db"
+import lf from "lovefield"
 import { ServiceHooks } from "../service"
 import { ServiceConfigs, SyncService } from "../../../schema-types"
 import { createSourceGroup } from "../group"
@@ -202,28 +204,41 @@ export const feverServiceHooks: ServiceHooks = {
         const state = getState()
         const configs = state.service as FeverConfigs
         if (date && !before) {
-            const iids = state.feeds[state.page.feedId].iids
-            const items = iids
-                .map(iid => state.items[iid])
-                .filter(i => !i.hasRead && i.date.getTime() >= date.getTime())
-            for (let item of items) {
-                if (item.serviceRef) {
-                    await markItem(configs, item, "read")
-                }
-            }
+            // Mark articles newer than date - must use individual markItem
+            const predicates: lf.Predicate[] = [
+                db.items.source.in(sids),
+                db.items.hasRead.eq(false),
+                db.items.serviceRef.isNotNull(),
+                db.items.date.gte(date),
+            ]
+            const query = lf.op.and.apply(null, predicates)
+            const rows = await db.itemsDB
+                .select(db.items.serviceRef)
+                .from(db.items)
+                .where(query)
+                .exec()
+            const refs = rows.map(row => row["serviceRef"])
+            await Promise.all(
+                refs.map(ref =>
+                    markItem(configs, { serviceRef: ref } as RSSItem, "read")
+                )
+            )
         } else {
             const sources = sids.map(sid => state.sources[sid])
             const timestamp =
                 Math.floor((date ? date.getTime() : Date.now()) / 1000) + 1
-            for (let source of sources) {
-                if (source.serviceRef) {
-                    await fetchAPI(
-                        configs,
-                        "",
-                        `&mark=feed&as=read&id=${source.serviceRef}&before=${timestamp}`
-                    )
-                }
-            }
+            await Promise.all(
+                sources.map(source => {
+                    if (source.serviceRef) {
+                        return fetchAPI(
+                            configs,
+                            "",
+                            `&mark=feed&as=read&id=${source.serviceRef}&before=${timestamp}`
+                        )
+                    }
+                    return Promise.resolve()
+                })
+            )
         }
     },
 
