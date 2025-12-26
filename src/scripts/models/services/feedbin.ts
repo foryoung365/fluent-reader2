@@ -52,6 +52,9 @@ async function markItems(
                 method: method,
                 headers: headers,
                 body: JSON.stringify(bodyObject),
+            }).then(res => {
+                if (!res.ok) throw APIError()
+                return res
             })
         )
     }

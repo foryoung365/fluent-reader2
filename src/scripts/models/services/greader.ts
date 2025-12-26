@@ -75,14 +75,30 @@ async function fetchAll(
     return new Set(results)
 }
 
-async function editTag(
+async function editTags(
     configs: GReaderConfigs,
-    ref: string,
+    refs: string[],
     tag: string,
     add = true
 ) {
-    const body = new URLSearchParams(`i=${ref}&${add ? "a" : "r"}=${tag}`)
-    return await fetchAPI(configs, "/reader/api/0/edit-tag", "POST", body)
+    if (refs.length === 0) return
+    const promises = new Array<Promise<Response>>()
+    const copy = [...refs]
+    while (copy.length > 0) {
+        const batch = copy.splice(0, 100)
+        const body = new URLSearchParams()
+        for (const ref of batch) body.append("i", ref)
+        body.append(add ? "a" : "r", tag)
+        promises.push(
+            fetchAPI(configs, "/reader/api/0/edit-tag", "POST", body).then(
+                res => {
+                    if (!res.ok) throw APIError()
+                    return res
+                }
+            )
+        )
+    }
+    return await Promise.all(promises)
 }
 
 function compactId(longId: string, useInt64: boolean) {
@@ -308,16 +324,16 @@ export const gReaderServiceHooks: ServiceHooks = {
                     const starred = item.starred
                     SourceRule.applyAll(source.rules, item)
                     if (item.hasRead !== hasRead)
-                        editTag(
+                        editTags(
                             configs,
-                            item.serviceRef,
+                            [item.serviceRef],
                             READ_TAG,
                             item.hasRead
                         )
                     if (item.starred !== starred)
-                        editTag(
+                        editTags(
                             configs,
-                            item.serviceRef,
+                            [item.serviceRef],
                             STAR_TAG,
                             item.starred
                         )
@@ -350,9 +366,9 @@ export const gReaderServiceHooks: ServiceHooks = {
                 .from(db.items)
                 .where(query)
                 .exec()
-            const refs = rows.map(row => row["serviceRef"]).join("&i=")
-            if (refs) {
-                await editTag(getState().service as GReaderConfigs, refs, READ_TAG)
+            const refs = rows.map(row => row["serviceRef"])
+            if (refs.length > 0) {
+                await editTags(getState().service as GReaderConfigs, refs, READ_TAG)
             }
         } else {
             const sources = sids.map(sid => state.sources[sid])
@@ -360,46 +376,47 @@ export const gReaderServiceHooks: ServiceHooks = {
                 if (source.serviceRef) {
                     const body = new URLSearchParams()
                     body.set("s", source.serviceRef)
-                    await fetchAPI(
+                    const res = await fetchAPI(
                         configs,
                         "/reader/api/0/mark-all-as-read",
                         "POST",
                         body
                     )
+                    if (!res.ok) throw APIError()
                 }
             }
         }
     },
 
     markRead: (item: RSSItem) => async (_, getState) => {
-        await editTag(
+        await editTags(
             getState().service as GReaderConfigs,
-            item.serviceRef,
+            [item.serviceRef],
             READ_TAG
         )
     },
 
     markUnread: (item: RSSItem) => async (_, getState) => {
-        await editTag(
+        await editTags(
             getState().service as GReaderConfigs,
-            item.serviceRef,
+            [item.serviceRef],
             READ_TAG,
             false
         )
     },
 
     star: (item: RSSItem) => async (_, getState) => {
-        await editTag(
+        await editTags(
             getState().service as GReaderConfigs,
-            item.serviceRef,
+            [item.serviceRef],
             STAR_TAG
         )
     },
 
     unstar: (item: RSSItem) => async (_, getState) => {
-        await editTag(
+        await editTags(
             getState().service as GReaderConfigs,
-            item.serviceRef,
+            [item.serviceRef],
             STAR_TAG,
             false
         )

@@ -23,7 +23,10 @@ async function fetchAPI(configs: FeverConfigs, params = "", postparams = "") {
         headers: { "content-type": "application/x-www-form-urlencoded" },
         body: `api_key=${configs.apiKey}${postparams}`,
     })
-    return await response.json()
+    if (!response.ok) throw APIError()
+    const json = await response.json()
+    if (json.auth === 0) throw APIError()
+    return json
 }
 
 async function markItem(configs: FeverConfigs, item: RSSItem, as: string) {
