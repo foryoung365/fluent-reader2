@@ -234,11 +234,10 @@
     display: -webkit-box;
     -webkit-box-orient: vertical;
 }
-.list-card.selected::before {
-    content: "";
-    display: block;
-    position: absolute;
-    height: 100%;
+.list-card.selected{
+    background: var(--white);
+    border-top: 2px solid var(--primary);
+    border-bottom: 2px solid var(--primary);
     border-left: 2px solid var(--primary);
 }
 .list-card.read,
