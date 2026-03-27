@@ -179,6 +179,10 @@
 .default-card p.snippet.show {
     transform: none;
 }
+.default-card.read{
+    color: var(--neutralSecondaryAlt);
+    opacity: 0.5;
+}
 
 .list-card {
     display: flex;
@@ -244,6 +248,7 @@
 .list-card.read,
 .list-card.read p.snippet {
     color: var(--neutralSecondaryAlt);
+    opacity: 0.5;
 }
 
 .magazine-card {
@@ -258,6 +263,7 @@
 }
 .magazine-card.read {
     color: var(--neutralSecondaryAlt);
+    opacity: 0.5;
 }
 .magazine-card:hover,
 .ms-Fabric--isFocusVisible .magazine-card:focus {
@@ -362,4 +368,8 @@
 }
 .compact-card .time {
     font-size: 12px;
+}
+.compact-card.read {
+    color: var(--neutralSecondaryAlt);
+    opacity: 0.5;
 }

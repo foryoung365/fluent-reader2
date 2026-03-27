@@ -3,10 +3,13 @@ import { Card } from "./card"
 import CardInfo from "./info"
 import Time from "../utils/time"
 import Highlights from "./highlights"
+import { ViewConfigs } from "../../schema-types"
 import { SourceTextDirection } from "../../scripts/models/source"
 
 const className = (props: Card.Props) => {
     let cn = ["card", "compact-card"]
+    if (props.viewConfigs & ViewConfigs.FadeRead && props.item.hasRead)
+        cn.push("read")
     if (props.item.hidden) cn.push("hidden")
     if (props.source.textDir === SourceTextDirection.RTL) cn.push("rtl")
     return cn.join(" ")

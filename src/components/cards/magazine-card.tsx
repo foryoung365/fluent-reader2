@@ -2,11 +2,13 @@ import * as React from "react"
 import { Card } from "./card"
 import CardInfo from "./info"
 import Highlights from "./highlights"
+import { ViewConfigs } from "../../schema-types"
 import { SourceTextDirection } from "../../scripts/models/source"
 
 const className = (props: Card.Props) => {
     let cn = ["card", "magazine-card"]
-    if (props.item.hasRead) cn.push("read")
+    if (props.viewConfigs & ViewConfigs.FadeRead && props.item.hasRead)
+        cn.push("read")
     if (props.item.hidden) cn.push("hidden")
     if (props.source.textDir === SourceTextDirection.RTL) cn.push("rtl")
     return cn.join(" ")
